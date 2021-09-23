@@ -9,7 +9,7 @@ class Client:
     def __init__(self, addr, port):
         print("Will write this later gonna play with sockets")
     def connectToServer(self):
-        print("Starting Server: ")
+        print("Attempting Connection: ")
 
     def sendTestPacket(HOST, PORT):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as soc:
