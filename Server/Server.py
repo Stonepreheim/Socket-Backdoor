@@ -28,5 +28,5 @@ class Server:
                     conn.sendall(data)
 
 if __name__ == '__main__':
-    #controller = Server(HOST, PORT)
+    #serv = Server(HOST, PORT)
     Server.testSocket(HOST, PORT)

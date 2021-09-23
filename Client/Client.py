@@ -20,4 +20,5 @@ class Client:
         print('Received', repr(data))
 
 if __name__ == '__main__':
+    #client = Client(HOST, PORT)
     Client.sendTestPacket(HOST, PORT)
