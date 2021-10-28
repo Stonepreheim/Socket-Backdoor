@@ -1,10 +1,14 @@
 #Written and designed by Stone Preheim
 import socket
 import os
+import sys
+import tqdm
+import math
+import shlex
 
 ADDR = '192.168.1.77'#portforwarding FTW! if you are looking to test this dr. use loopback
 PORT = 7771
-BYTEBUFFER = 1024
+BYTEBUFFER = 4096
 SPLITTER = "<<<Split>>>"#need this to still allow spaces
 
 class Server:
@@ -30,16 +34,34 @@ class Server:
                     if Choice == "1":
                         while True:
                             servCom = input("StoneShell> ")
-                            servComArr= servCom.split(" ")#TODO:solve space issue
+                            if servCom == "":
+                                continue
+                            servComArr= shlex.split(servCom)#shlex reads command in shell like regex
                             if servCom == "exit":
                                 break
                             #takes form of "upload <local file location> <target location on remote>"
                             elif servComArr[0] == "upload":
                                 try:
-                                    fileChunks = os.path.getsize(servComArr[1])
+                                    fileSizeBytes = os.path.getsize(servComArr[1])
+                                    fileChunks = math.ceil(fileSizeBytes/BYTEBUFFER)
                                     with open(servComArr[1], "rb") as file:
-                                        conn.sendall(f"transfer{SPLITTER}{servComArr[2]}{SPLITTER}".encode())
-
+                                        conn.sendall(f'upload "{servComArr[2]}" {fileSizeBytes} {fileChunks}'.encode())
+                                        progress = tqdm.tqdm(range(fileSizeBytes), "Sending File", unit="B",
+                                                             unit_scale=True, unit_divisor=1024)
+                                        #open new socket for transfer
+                                        for x in range(fileChunks+1):
+                                            chunk = file.read(BYTEBUFFER)
+                                            if not chunk:
+                                                break
+                                            conn.sendall(chunk)
+                                            progress.update(len(chunk))
+                                        #remainingBytes = fileSizeBytes - (BYTEBUFFER * (fileChunks - 1))
+                                        #conn.sendall(file.read(remainingBytes))
+                                        #progress.update(remainingBytes)
+                                        print(conn.recv(BYTEBUFFER).decode())
+                                except FileNotFoundError as e:
+                                    print("File was not located please check path and try again")
+                                    continue
                                 except Exception as e:
                                     print(e.with_traceback())
                             else:

