@@ -40,8 +40,9 @@ class Client:
                         fileSizeBytes = int(servComArr[2])
                         fileChunks = int(servComArr[3])
                         with open(fileLocation, 'wb') as outFile:
-                            for x in range(fileChunks+1):#all but last offsized chunk
-                                outFile.write(soc.recv(BYTEBUFFER))
+                            outFile.write(soc.recv(fileSizeBytes, socket.MSG_WAITALL))#oh my this took so long to figure out
+                            #for x in range(fileChunks):#all but last offsized chunk
+                            #    outFile.write(soc.recv(BYTEBUFFER))
                             #remainingBytes = fileSizeBytes-(BYTEBUFFER*(fileChunks-1))
                             #outFile.write(soc.recv(remainingBytes))
                             outFile.close()
@@ -68,7 +69,10 @@ class Client:
                             soc.sendall(output)
                 #gracefully close connection on exception
                 except UnicodeDecodeError as e:
-                    print(e)
+                    print(e.with_traceback())
+                    continue
+                except IndexError as e:
+                    print(e.with_traceback())
                     continue
                 except Exception as e:
                     soc.sendall(b"EXCEPTION")

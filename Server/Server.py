@@ -39,6 +39,9 @@ class Server:
                             servComArr= shlex.split(servCom)#shlex reads command in shell like regex
                             if servCom == "exit":
                                 break
+                            #takes form of "grab <target location on remote>"
+                            elif servComArr[0] == "grab":
+                                print()
                             #takes form of "upload <local file location> <target location on remote>"
                             elif servComArr[0] == "upload":
                                 try:
@@ -47,17 +50,17 @@ class Server:
                                     with open(servComArr[1], "rb") as file:
                                         conn.sendall(f'upload "{servComArr[2]}" {fileSizeBytes} {fileChunks}'.encode())
                                         progress = tqdm.tqdm(range(fileSizeBytes), "Sending File", unit="B",
-                                                             unit_scale=True, unit_divisor=1024)
+                                                             unit_scale=True, unit_divisor=1024, miniters=1, smoothing=1)
                                         #open new socket for transfer
-                                        for x in range(fileChunks+1):
+                                        for x in range(fileChunks-1):
                                             chunk = file.read(BYTEBUFFER)
                                             if not chunk:
                                                 break
                                             conn.sendall(chunk)
                                             progress.update(len(chunk))
-                                        #remainingBytes = fileSizeBytes - (BYTEBUFFER * (fileChunks - 1))
-                                        #conn.sendall(file.read(remainingBytes))
-                                        #progress.update(remainingBytes)
+                                        remainingBytes = fileSizeBytes - (BYTEBUFFER * (fileChunks - 1))
+                                        conn.sendall(file.read(remainingBytes))
+                                        progress.update(remainingBytes)
                                         print(conn.recv(BYTEBUFFER).decode())
                                 except FileNotFoundError as e:
                                     print("File was not located please check path and try again")
