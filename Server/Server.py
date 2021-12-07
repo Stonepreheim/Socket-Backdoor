@@ -90,7 +90,7 @@ class Server:
                                 else:
                                     print(output.decode("utf-8"))
                     #exit other functions coming soon
-                    elif Choice == "4":
+                    elif Choice == "2":
                         break
                     else:
                         print("Your input was invalid or option is not yet defined")
