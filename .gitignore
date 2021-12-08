@@ -117,3 +117,4 @@ dmypy.json
 .pyre/
 Documentation/Needs Statement and FSD.docx
 *.docx
+Client/secretsauce.png

