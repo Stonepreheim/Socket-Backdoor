@@ -1,7 +1,6 @@
 #Written and designed by Stone Preheim
 import socket
 import os
-import sys
 import tqdm
 import math
 import shlex
@@ -37,7 +36,6 @@ class Server:
                             if servCom == "":
                                 continue
                             servComArr= shlex.split(servCom, posix=False)#shlex reads command in shell like regex, found some escape char errors
-                            print(servComArr)
                             if servCom == "exit":
                                 break
                             #takes form of "grab <local save location> <target location on remote>" use quotes to preserve literal path

