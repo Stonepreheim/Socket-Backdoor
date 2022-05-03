@@ -5,7 +5,7 @@ import keyboard
 from discord import Webhook, RequestsWebhookAdapter
 import os
 
-#will need to post directly to webhook since i want to run in thread
+#will need to post directly to webhook since i want to run in new thread
 WEBHOOK = "https://discord.com/api/webhooks/947727566226202634/St1laTDd5koi49lss-IqtYJrcHgYpNrv11pV-ED2g4AYo_yPj_g4K-yLyWzMrZJHXwNk"
 webControl = Webhook.from_url(WEBHOOK, adapter=RequestsWebhookAdapter())#didnt need an async adapter here so just using requests
 
