@@ -23,7 +23,7 @@ import pyautogui
 import cv2
 
 # putting my API token here I can regenerate and invalidate this one it if this code is ever leaked and used malliciously.
-TOKEN = "ODM0OTA2MDQ1MDYyMTg0OTkx.YIHs2A.fqZvw5tlT9NLBCVtczXVKfmrNNY"
+TOKEN = "<Discord Token here>"
 bot = commands.Bot(command_prefix='!')
 #create way for bot to identify itself off username and random int(posibility of duplicate usernames)
 botID = getpass.getuser() + str(random.randint(0, 10))
